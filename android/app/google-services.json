@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "580372107773",
+    "project_id": "ev-charger-finder-app",
+    "storage_bucket": "ev-charger-finder-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:580372107773:android:7e1b3b19b81b089ddfc994",
+        "android_client_info": {
+          "package_name": "com.example.ev_charger_finder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBBr3cOplZu5Ho0Pd0Q3KnmgRD0kxEdN4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
