@@ -99,6 +99,7 @@ This project was developed iteratively through the following phases:
 
 ## 👥 Contributors
 
--   [Your Name](https://github.com/your-username)
+-   [Badrul](https://github.com/jerungpyro)
+-   [Sufyan](https://github.com/pyunk)
+-   [Azwar Ansori](https://github.com/AzwarAns61)
 -   [Teammate 2's Name](https://github.com/teammate2-username)
--   ... add all group members
