@@ -102,12 +102,11 @@ This project contains two applications: the main mobile app and a web admin pane
     This will use the default `lib/main.dart` entry point.
     ```sh
     flutter run
-        ```
 
 
 8. **Run the WebAdminPanel**
     ```sh
-        flutter run -d chrome --target=lib/main_web.dart
+    flutter run -d chrome --target=lib/main_web.dart
 ---
 
 ## 📝 Project Phases
