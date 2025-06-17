@@ -35,12 +35,12 @@ A full-stack, real-time, community-driven mobile application built with Flutter 
 ## 📸 Screenshots
 
 | Login Screen | Map View (Dark) | Station Details |
-| :---: | :---: | :---: |
-| |  |  |
+|:---:|:---:|:---:|
+| ![Login Screen](screenshots/login_screen.png) | ![Map View](screenshots/map_view_dark.png) | ![Station Details](screenshots/station_detail.png) |
 
 | Profile Screen | Friends System | Web Admin Panel |
-| :---: | :---: | :---: |
-|  |  |  |
+|:---:|:---:|:---:|
+| ![Profile Screen](screenshots/profile_screen.png) | ![Friends System](screenshots/friends_system.png) | <!-- TODO: Add screenshot for admin panel --> |
 
 
 ---
