@@ -17,7 +17,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
   Future<void> _toggleAdminStatus(DocumentSnapshot userDoc) async {
     bool currentStatus = userDoc.get('isAdmin') ?? false;
     await userDoc.reference.update({'isAdmin': !currentStatus});
-    if(mounted) {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Admin status updated for ${userDoc.get('email')}.')),
       );
@@ -28,7 +28,7 @@ class _UserManagementPageState extends State<UserManagementPage> {
   Future<void> _toggleDisableStatus(DocumentSnapshot userDoc) async {
     bool currentStatus = userDoc.get('isDisabled') ?? false;
     await userDoc.reference.update({'isDisabled': !currentStatus});
-    if(mounted) {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('User account status updated for ${userDoc.get('email')}.')),
       );
@@ -49,16 +49,20 @@ class _UserManagementPageState extends State<UserManagementPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text('No users found in the database.'));
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong.'));
           }
 
           final users = snapshot.data!.docs;
 
+          // --- THIS IS THE FIX ---
+          // The DataTable is wrapped in a SingleChildScrollView that scrolls horizontally.
+          // This ensures it will not overflow on smaller web browser windows.
           return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             child: DataTable(
               showCheckboxColumn: false, // Cleaner look
               columns: const [
