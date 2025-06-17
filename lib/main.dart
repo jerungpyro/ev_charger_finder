@@ -16,6 +16,7 @@ import 'package:geolocator/geolocator.dart';
 // Local Imports
 import 'firebase_options.dart';
 import 'charging_station.dart';
+import 'screens/add_station_screen.dart';
 import 'screens/auth_gate.dart';
 import 'screens/profile_screen.dart';
 import 'screens/station_detail_sheet.dart';
@@ -35,18 +36,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'EV Charger Finder',
       debugShowCheckedModeBanner: false,
-      // --- REVERTED: Define both light and dark themes for the app ---
       theme: ThemeData(
         primarySwatch: Colors.green,
-        useMaterial3: true,
         brightness: Brightness.light,
+        useMaterial3: true,
       ),
       darkTheme: ThemeData(
         primarySwatch: Colors.green,
-        useMaterial3: true,
         brightness: Brightness.dark,
+        useMaterial3: true,
       ),
-      themeMode: ThemeMode.system, // App theme will follow system settings
+      themeMode: ThemeMode.system,
       home: const AuthGate(),
     );
   }
@@ -65,8 +65,6 @@ class _MapScreenState extends State<MapScreen> {
   BitmapDescriptor? _iconAvailable;
   BitmapDescriptor? _iconBusy;
   BitmapDescriptor? _iconUnavailable;
-
-  // --- CHANGED: We only need the dark style, the silver style variable is removed ---
   String? _darkMapStyle;
 
   bool _filterAvailable = false;
@@ -84,14 +82,10 @@ class _MapScreenState extends State<MapScreen> {
     super.dispose();
   }
 
-  // --- UPDATED: Simplified to only load the dark style JSON ---
   Future<void> _loadAssets() async {
-    // Load icons
     _iconAvailable = BitmapDescriptor.fromBytes(await _getBytesFromAsset('assets/images/ev_icon_green.png', 120));
     _iconBusy = BitmapDescriptor.fromBytes(await _getBytesFromAsset('assets/images/ev_icon_orange.png', 120));
     _iconUnavailable = BitmapDescriptor.fromBytes(await _getBytesFromAsset('assets/images/ev_icon_red.png', 120));
-    
-    // Load only the dark map style JSON
     _darkMapStyle = await rootBundle.loadString('assets/map_styles/dark_style.json');
   }
 
@@ -126,7 +120,6 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _checkLocationPermissionAndFetchLocation() async {
-    // ... (This function remains unchanged)
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Location services are disabled.')));
@@ -159,14 +152,11 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  // --- UPDATED: This now applies dark style or NO style (which results in default) ---
   void _setMapStyle(GoogleMapController controller) {
     final Brightness currentBrightness = Theme.of(context).brightness;
     if (currentBrightness == Brightness.dark) {
-      // If the device is in dark mode, apply our custom dark style
       controller.setMapStyle(_darkMapStyle);
     } else {
-      // If the device is in light mode, apply null to reset to the default Google Maps style
       controller.setMapStyle(null);
     }
   }
@@ -273,6 +263,9 @@ class _MapScreenState extends State<MapScreen> {
                   initialCameraPosition: const CameraPosition(target: LatLng(3.1390, 101.6869), zoom: 11.0),
                   myLocationEnabled: true,
                   myLocationButtonEnabled: false,
+                  // --- UPDATED: Disable the default zoom controls and toolbar ---
+                  zoomControlsEnabled: false,
+                  mapToolbarEnabled: false,
                   markers: markers,
                   onMapCreated: (GoogleMapController controller) {
                     if (!_controllerCompleter.isCompleted) {
@@ -286,12 +279,32 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _checkLocationPermissionAndFetchLocation,
-        tooltip: 'My Location',
-        child: const Icon(Icons.my_location),
+      // --- UPDATED: Repositioned the FABs to the default bottom-right ---
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              heroTag: 'add_station_fab',
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const AddStationScreen()),
+                );
+              },
+              tooltip: 'Add Station',
+              child: const Icon(Icons.add_location_alt),
+            ),
+            const SizedBox(height: 16),
+            FloatingActionButton(
+              heroTag: 'my_location_fab',
+              onPressed: _checkLocationPermissionAndFetchLocation,
+              tooltip: 'My Location',
+              child: const Icon(Icons.my_location),
+            ),
+          ],
+        ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );
   }
 }

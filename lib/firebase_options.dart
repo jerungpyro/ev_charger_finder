@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -59,4 +56,15 @@ class DefaultFirebaseOptions {
     projectId: 'ev-charger-finder-app',
     storageBucket: 'ev-charger-finder-app.firebasestorage.app',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBr07j50z3YmC-dYV_pikdHfae2K2b_dsU',
+    appId: '1:580372107773:web:7d3482f5906a75bbdfc994',
+    messagingSenderId: '580372107773',
+    projectId: 'ev-charger-finder-app',
+    authDomain: 'ev-charger-finder-app.firebaseapp.com',
+    storageBucket: 'ev-charger-finder-app.firebasestorage.app',
+    measurementId: 'G-R58P9M4Y7N',
+  );
+
 }
