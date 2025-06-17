@@ -1,6 +1,7 @@
 // File: lib/screens/login_screen.dart
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -16,9 +17,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
-  // --- Login Logic ---
+  // --- Login Logic with Disabled User Check ---
   Future<void> _login() async {
-    // Prevent multiple login attempts
     if (_isLoading) return;
 
     setState(() {
@@ -26,22 +26,36 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Attempt to sign in with email and password
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      // Attempt to sign in
+      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // No need to navigate here, the AuthGate will handle it automatically
+
+      // --- NEW: Check if the user is disabled ---
+      if (userCredential.user != null) {
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).get();
+        if (userDoc.exists && userDoc.data()?['isDisabled'] == true) {
+          // If disabled, sign out immediately and throw a specific error
+          await FirebaseAuth.instance.signOut();
+          throw FirebaseAuthException(
+            code: 'user-disabled',
+            message: 'This account has been disabled by an administrator.',
+          );
+        }
+      }
+      // If not disabled, AuthGate will navigate automatically
+
     } on FirebaseAuthException catch (e) {
-      // Show an error message to the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message ?? 'Login failed. Please try again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? 'Login failed. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
-      // Ensure the loading state is turned off even if an error occurs
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -60,6 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // This is the polished UI from your previous correct version
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
