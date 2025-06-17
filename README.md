@@ -55,20 +55,17 @@ This project contains two applications: the main mobile app and a web admin pane
     ```sh
     flutterfire configure
     ```
-5.  **Add your Google Maps API Key:** Open `android/app/src/main/AndroidManifest.xml` and replace the placeholder with your API key.
+5.  **Add your Google Maps API Key**
+    - Open `android/app/src/main/AndroidManifest.xml` and replace the placeholder with your API key:
+    ```xml
+    <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="YOUR_API_KEY_HERE"/>
+    ```
 
-### Running the Apps
-
-#### To run the Mobile App:
-The entry point for the mobile app is `lib/main.dart`.
-```sh
-flutter run
-
-#### To run the Web Admin Panel:
-The entry point for the web app is `lib/main_web.dart`.
-```sh
-flutter run -d chrome --target=lib/main_web.dart
-
+6.  **Run the app**
+    ```sh
+    flutter run
+    ```
 ---
 ## 📝 Project Phases
 
