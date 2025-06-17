@@ -106,16 +106,13 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  // --- UPDATED: Simplified function call ---
   void _showStationDetails(ChargingStation station) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return StationDetailSheet(
-          station: station,
-          onUpdate: () {},
-        );
-      },
+      isScrollControlled: true, // Allows the sheet to be dragged up
+      backgroundColor: Colors.transparent, // Important for rounded corners on the sheet
+      builder: (context) => StationDetailSheet(station: station),
     );
   }
 
@@ -263,7 +260,6 @@ class _MapScreenState extends State<MapScreen> {
                   initialCameraPosition: const CameraPosition(target: LatLng(3.1390, 101.6869), zoom: 11.0),
                   myLocationEnabled: true,
                   myLocationButtonEnabled: false,
-                  // --- UPDATED: Disable the default zoom controls and toolbar ---
                   zoomControlsEnabled: false,
                   mapToolbarEnabled: false,
                   markers: markers,
@@ -279,7 +275,6 @@ class _MapScreenState extends State<MapScreen> {
           ),
         ],
       ),
-      // --- UPDATED: Repositioned the FABs to the default bottom-right ---
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 16.0),
         child: Column(

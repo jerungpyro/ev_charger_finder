@@ -10,6 +10,9 @@ class ChargingStation {
   final LatLng location;
   final int availablePorts;
   final int totalPorts;
+  // --- NEW: Add the new rating fields ---
+  final int ratingCount;
+  final int ratingSum;
 
   ChargingStation({
     required this.id,
@@ -18,14 +21,15 @@ class ChargingStation {
     required this.location,
     required this.availablePorts,
     required this.totalPorts,
+    // --- NEW: Add them to the constructor ---
+    required this.ratingCount,
+    required this.ratingSum,
   });
 
-  // --- NEW: Add this factory constructor ---
-  // It creates a ChargingStation instance from a Firestore document.
+  // --- UPDATED: Update the factory constructor to parse the new fields ---
   factory ChargingStation.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     
-    // Safely handle the location field
     GeoPoint geoPoint = data['location'] ?? const GeoPoint(0, 0);
 
     return ChargingStation(
@@ -35,6 +39,9 @@ class ChargingStation {
       location: LatLng(geoPoint.latitude, geoPoint.longitude),
       availablePorts: data['availablePorts'] ?? 0,
       totalPorts: data['totalPorts'] ?? 0,
+      // Safely parse the new integer fields, defaulting to 0 if they don't exist
+      ratingCount: data['ratingCount'] ?? 0,
+      ratingSum: data['ratingSum'] ?? 0,
     );
   }
 }
