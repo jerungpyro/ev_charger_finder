@@ -70,7 +70,6 @@ This project contains two applications: the main mobile app and a web admin pane
 7. **Run the WebAdminPanel**
     ```sh
         flutter run -d chrome --target=lib/main_web.dart
-        ```
 ---
 ## 📝 Project Phases
 
