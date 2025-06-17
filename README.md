@@ -1,6 +1,5 @@
 # 🚗 EV Charger Finder
 
- 
 <!-- TODO: Replace with a GIF of your app in action. You can use a tool like ScreenToGif -->
 
 A real-time, community-driven mobile application built with Flutter that helps electric vehicle drivers locate and check the availability of nearby charging stations.
@@ -9,12 +8,14 @@ A real-time, community-driven mobile application built with Flutter that helps e
 
 ## ✨ Features
 
-- **📍 Live Map View:** Displays all nearby charging stations on an interactive Google Map.
-- **🟢 Dynamic Status Markers:** See the real-time availability of chargers at a glance with color-coded icons (Green: Available, Orange: In Use, Red: Out of Order).
+- **📍 Live Map View:** Displays all nearby charging stations on an interactive Google Map with custom dark/light themes.
+- **🟢 Dynamic Status Markers:** See the real-time availability of chargers at a glance with color-coded icons.
+- **🔍 Search & Filter:** Instantly find stations by name or filter the map to show only currently available chargers.
+- **🗺️ Get Directions:** Launch the native maps app to navigate directly to a selected charging station.
 - **👤 User Authentication:** Secure login and registration system powered by Firebase Authentication.
 - **🚗 Profile Management:** Users can save their vehicle information (model and registration number).
-- **🤝 Community-Driven Updates:** Users can update the availability of charging ports in real-time, keeping the data fresh and reliable.
-- **ℹ️ Detailed Information:** Tap on any station to view its address, provider, and a detailed breakdown of port availability.
+- **🤝 Community-Driven Updates:** Users can update the availability of charging ports in real-time.
+- **❤️ Social System:** A complete friends system with user search, friend requests, and a friends list.
 - **CI/CD Pipeline:** Automated checks for code formatting and analysis using GitHub Actions to ensure code quality.
 
 ---
@@ -92,8 +93,10 @@ This project was developed iteratively through the following phases:
 -   **Phase 6 (Complete):** User Authentication and Profile Management
 -   **Phase 7 (Complete):** Implementing Real-Time Updates
 -   **Phase 8 (Complete):** Adding Auxiliary Features ("About Us" Page)
+-   **Phase 10 (Complete):** Essential User-Facing Features (Directions, Search & Filtering)
+-   **Phase 11 (Complete):** Social and Community Features ("Friends" System)
+-   **Phase 12 (Complete):** Advanced Features (Custom Map Styles)
 -   **Phase 9 (Incomplete):** Web-Based Admin Panel
--   ... and more to come!
 
 ---
 
