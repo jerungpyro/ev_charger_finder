@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import the new package
 import '../charging_station.dart';
 
 class StationDetailSheet extends StatefulWidget {
@@ -49,24 +50,51 @@ class _StationDetailSheetState extends State<StationDetailSheet> {
       });
       
       // The map will update automatically via the stream.
-      // This callback is now optional, but good for triggering other UI feedback.
       widget.onUpdate();
 
     } catch (e) {
       print("Error updating port count: $e");
-      if(mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Failed to update status. Please try again.')),
         );
       }
     } finally {
-      if(mounted) {
+      if (mounted) {
         setState(() {
           _isUpdating = false;
         });
       }
     }
   }
+
+  // --- NEW: This function builds the Google Maps URL and launches it ---
+  Future<void> _launchMaps() async {
+    final station = widget.station;
+    final lat = station.location.latitude;
+    final lng = station.location.longitude;
+
+    // This universal URI works for both Android and iOS to open navigation
+    final uri = Uri.parse('google.navigation:q=$lat,$lng&mode=d');
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      // Fallback to a web browser if the Maps app is not installed
+      final webUri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+      if (await canLaunchUrl(webUri)) {
+        await launchUrl(webUri);
+      } else {
+        // Show an error if it fails
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open maps to get directions.')),
+          );
+        }
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -116,10 +144,17 @@ class _StationDetailSheetState extends State<StationDetailSheet> {
           const SizedBox(height: 20),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-              child: const Text('Done'),
+            child: ElevatedButton.icon(
+              // --- CHANGED: Calls the new _launchMaps function ---
+              onPressed: _launchMaps,
+              icon: const Icon(Icons.directions),
+              label: const Text('Get Directions'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                textStyle: const TextStyle(fontSize: 16),
+              ),
             ),
           ),
         ],

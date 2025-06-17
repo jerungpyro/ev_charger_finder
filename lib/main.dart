@@ -20,7 +20,6 @@ import 'screens/auth_gate.dart';
 import 'screens/profile_screen.dart';
 import 'screens/station_detail_sheet.dart';
 
-// --- Main Function: Initializes Firebase before running the app ---
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -36,10 +35,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'EV Charger Finder',
       debugShowCheckedModeBanner: false,
+      // --- REVERTED: Define both light and dark themes for the app ---
       theme: ThemeData(
         primarySwatch: Colors.green,
         useMaterial3: true,
+        brightness: Brightness.light,
       ),
+      darkTheme: ThemeData(
+        primarySwatch: Colors.green,
+        useMaterial3: true,
+        brightness: Brightness.dark,
+      ),
+      themeMode: ThemeMode.system, // App theme will follow system settings
       home: const AuthGate(),
     );
   }
@@ -53,83 +60,39 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controllerCompleter = Completer();
-  final Set<Marker> _markers = {};
-
-  // This will hold our live connection to Firestore
-  StreamSubscription<QuerySnapshot>? _chargerSubscription;
+  final TextEditingController _searchController = TextEditingController();
 
   BitmapDescriptor? _iconAvailable;
   BitmapDescriptor? _iconBusy;
   BitmapDescriptor? _iconUnavailable;
-  bool _isLoading = true;
+
+  // --- CHANGED: We only need the dark style, the silver style variable is removed ---
+  String? _darkMapStyle;
+
+  bool _filterAvailable = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeMap();
+    _loadAssets();
+    _checkLocationPermissionAndFetchLocation();
   }
 
-  // --- NEW: Cancel the subscription when the screen is closed ---
   @override
   void dispose() {
-    _chargerSubscription?.cancel();
+    _searchController.dispose();
     super.dispose();
   }
 
-  Future<void> _initializeMap() async {
-    await _loadCustomIcons();
-    _listenToChargerUpdates(); // This now sets up the live stream
-    await _checkLocationPermissionAndFetchLocation();
-  }
-
-  // --- REFACTORED: This now listens for real-time updates ---
-  void _listenToChargerUpdates() {
-    final firestore = FirebaseFirestore.instance;
-
-    _chargerSubscription = firestore.collection('chargers').snapshots().listen(
-      (snapshot) {
-        print("[DEBUG] Firestore data changed. Received ${snapshot.docs.length} documents.");
-        if (!mounted) return;
-
-        final List<ChargingStation> stations = [];
-        for (var doc in snapshot.docs) {
-          final data = doc.data();
-          if (data['location'] == null || data['location'] is! GeoPoint) {
-            continue;
-          }
-
-          final geoPoint = data['location'] as GeoPoint;
-          stations.add(
-            ChargingStation(
-              id: doc.id,
-              name: data['name'] ?? 'Unnamed Station',
-              address: data['address'] ?? 'No address',
-              location: LatLng(geoPoint.latitude, geoPoint.longitude),
-              availablePorts: data['availablePorts'] ?? 0,
-              totalPorts: data['totalPorts'] ?? 0,
-            ),
-          );
-        }
-        
-        _addMarkers(stations);
-
-        if (_isLoading) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-      },
-      onError: (error) {
-        print("[DEBUG] ❌ Firestore listener error: $error");
-      },
-    );
-  }
-
-  // --- (The following methods are mostly unchanged) ---
-  Future<void> _loadCustomIcons() async {
+  // --- UPDATED: Simplified to only load the dark style JSON ---
+  Future<void> _loadAssets() async {
+    // Load icons
     _iconAvailable = BitmapDescriptor.fromBytes(await _getBytesFromAsset('assets/images/ev_icon_green.png', 120));
     _iconBusy = BitmapDescriptor.fromBytes(await _getBytesFromAsset('assets/images/ev_icon_orange.png', 120));
     _iconUnavailable = BitmapDescriptor.fromBytes(await _getBytesFromAsset('assets/images/ev_icon_red.png', 120));
+    
+    // Load only the dark map style JSON
+    _darkMapStyle = await rootBundle.loadString('assets/map_styles/dark_style.json');
   }
 
   Future<Uint8List> _getBytesFromAsset(String path, int width) async {
@@ -137,22 +100,6 @@ class _MapScreenState extends State<MapScreen> {
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
-  }
-
-  void _addMarkers(List<ChargingStation> stations) {
-    setState(() {
-      _markers.clear();
-      for (final station in stations) {
-        _markers.add(
-          Marker(
-            markerId: MarkerId(station.id),
-            position: station.location,
-            icon: _getMarkerIcon(station),
-            onTap: () => _showStationDetails(station),
-          ),
-        );
-      }
-    });
   }
 
   BitmapDescriptor _getMarkerIcon(ChargingStation station) {
@@ -165,23 +112,21 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  // --- REFACTORED: This function is now simpler ---
   void _showStationDetails(ChargingStation station) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        // The onUpdate callback now does nothing, as the stream handles updates.
-        // We could remove it entirely, but this works for simplicity.
         return StationDetailSheet(
           station: station,
-          onUpdate: () {}, 
+          onUpdate: () {},
         );
       },
     );
   }
 
   Future<void> _checkLocationPermissionAndFetchLocation() async {
+    // ... (This function remains unchanged)
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Location services are disabled.')));
@@ -214,8 +159,33 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  // --- UPDATED: This now applies dark style or NO style (which results in default) ---
+  void _setMapStyle(GoogleMapController controller) {
+    final Brightness currentBrightness = Theme.of(context).brightness;
+    if (currentBrightness == Brightness.dark) {
+      // If the device is in dark mode, apply our custom dark style
+      controller.setMapStyle(_darkMapStyle);
+    } else {
+      // If the device is in light mode, apply null to reset to the default Google Maps style
+      controller.setMapStyle(null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    Query chargersQuery = FirebaseFirestore.instance.collection('chargers');
+    final searchQuery = _searchController.text.trim();
+
+    if (searchQuery.isNotEmpty) {
+      chargersQuery = chargersQuery
+          .where('name', isGreaterThanOrEqualTo: searchQuery)
+          .where('name', isLessThanOrEqualTo: '$searchQuery\uf8ff');
+    }
+
+    if (_filterAvailable) {
+      chargersQuery = chargersQuery.where('availablePorts', isGreaterThan: 0);
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('EV Charger Finder'),
@@ -231,20 +201,91 @@ class _MapScreenState extends State<MapScreen> {
           )
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : GoogleMap(
-              initialCameraPosition: const CameraPosition(target: LatLng(3.1390, 101.6869), zoom: 11.0),
-              mapType: MapType.normal,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              markers: _markers,
-              onMapCreated: (GoogleMapController controller) {
-                if (!_controllerCompleter.isCompleted) {
-                  _controllerCompleter.complete(controller);
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Search by station name...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    FocusScope.of(context).unfocus();
+                    setState(() {});
+                  },
+                ),
+              ),
+              onChanged: (value) => setState(() {}),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Wrap(
+                spacing: 8.0,
+                children: [
+                  FilterChip(
+                    label: const Text('Available Now'),
+                    selected: _filterAvailable,
+                    onSelected: (bool selected) {
+                      setState(() {
+                        _filterAvailable = selected;
+                      });
+                    },
+                    selectedColor: Colors.green.withOpacity(0.2),
+                    checkmarkColor: Colors.green,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: chargersQuery.snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
                 }
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Something went wrong. Check the console.'));
+                }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text('No matching charging stations found.'));
+                }
+
+                final Set<Marker> markers = snapshot.data!.docs.map((doc) {
+                  final station = ChargingStation.fromFirestore(doc);
+                  return Marker(
+                    markerId: MarkerId(station.id),
+                    position: station.location,
+                    icon: _getMarkerIcon(station),
+                    onTap: () => _showStationDetails(station),
+                  );
+                }).toSet();
+
+                return GoogleMap(
+                  initialCameraPosition: const CameraPosition(target: LatLng(3.1390, 101.6869), zoom: 11.0),
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  markers: markers,
+                  onMapCreated: (GoogleMapController controller) {
+                    if (!_controllerCompleter.isCompleted) {
+                      _controllerCompleter.complete(controller);
+                    }
+                    _setMapStyle(controller);
+                  },
+                );
               },
             ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _checkLocationPermissionAndFetchLocation,
         tooltip: 'My Location',

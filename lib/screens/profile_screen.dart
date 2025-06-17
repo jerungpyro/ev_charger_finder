@@ -3,7 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'about_screen.dart'; // Import the new about screen
+import 'about_screen.dart';
+import 'friends_screen.dart'; // Import the new friends screen
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -171,7 +172,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // --- NEW: About Us Button ---
+                // --- Links Section ---
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.people_outline),
+                  title: const Text('Friends'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => const FriendsScreen()),
+                    );
+                  },
+                ),
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.info_outline),

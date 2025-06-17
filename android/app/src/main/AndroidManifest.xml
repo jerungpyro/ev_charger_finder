@@ -42,20 +42,29 @@
          In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
           
           
+          
     <queries>
-    <!-- Intent block for processing text -->
+    <!-- Intent for processing text (from a default plugin) -->
     <intent>
         <action android:name="android.intent.action.PROCESS_TEXT" />
         <data android:mimeType="text/plain" />
     </intent>
     
-    <!-- Intent block for launching web URLs -->
+    <!-- Intent for launching web URLs (for url_launcher) -->
     <intent>
         <action android:name="android.intent.action.VIEW" />
-        <!-- CORRECTED: removed the extra 's' -->
         <data android:scheme="https" />
     </intent>
+
+    <!-- NEW: Add this block for launching Google Maps -->
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:scheme="google.navigation" />
+        <category android:name="android.intent.category.BROWSABLE" />
+    </intent>
     </queries>
+
+    
 
     
 
