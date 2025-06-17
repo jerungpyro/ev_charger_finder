@@ -95,7 +95,7 @@ This project was developed iteratively through the following phases:
 -   **Phase 8 (Complete):** Adding Auxiliary Features ("About Us" Page)
 -   **Phase 10 (Complete):** Essential User-Facing Features (Directions, Search & Filtering)
 -   **Phase 11 (Complete):** Social and Community Features ("Friends" System)
--   **Phase 12 (Complete):** Advanced Features (Custom Map Styles)
+-   **Phase 12 (Complete):** Advanced Features (Custom Map Styles | Light & Dark Theme)
 -   **Phase 9 (Incomplete):** Web-Based Admin Panel
 
 ---
