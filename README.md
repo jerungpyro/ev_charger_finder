@@ -100,6 +100,6 @@ This project was developed iteratively through the following phases:
 ## 👥 Contributors
 
 -   [Badrul](https://github.com/jerungpyro)
--   [Sufyan](https://github.com/pyunk)
+-   [Muhammad Sufyan](https://github.com/pyunk)
 -   [Azwar Ansori](https://github.com/AzwarAns61)
--   [Teammate 2's Name](https://github.com/teammate2-username)
+-   [Wan Muhammad Azlan](https://github.com/Lannnzzz)
